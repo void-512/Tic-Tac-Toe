@@ -1,18 +1,17 @@
 namespace tictactoe;
 
-public partial class Form1 : Form
+public partial class GameForm : Form
 {
     private ButtonBoard board;
-    private int boardRow;
-    private int boardCol;
-    public Form1()
+    private int row;
+    private int col;
+    public GameForm()
     {
-        InitializeComponent();
         board = new ButtonBoard();
         Tuple<int, int> size = board.GetSize();
-        boardRow = size.Item1;
-        boardCol = size.Item2;
-        
+        row = size.Item1;
+        col = size.Item2;
+        InitializeComponent();
         CreateGridButtons();
     }
 }

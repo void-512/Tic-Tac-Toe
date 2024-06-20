@@ -12,7 +12,7 @@ static class Program
         // see https://aka.ms/applicationconfiguration.
        
         ApplicationConfiguration.Initialize();
-        Application.Run(new Form1());
+        Application.Run(new GameForm());
     }    
 }
 
@@ -25,22 +25,14 @@ public class ButtonBoard
 
     private int winRule = 3;
 
+    private Button[, ] board;
+
+    public delegate bool CheckWinDelegate(Button button, char currentPlayer);
+    public event CheckWinDelegate CheckWinEvent;
+
     public Tuple<int, int> GetSize()
     {
         return new Tuple<int, int>(row, col);
-    }
-
-    private Button[, ] board;
-    public ButtonBoard()
-    {
-        board = new Button[row, col];
-        for (int r = 0; r < row; r++)
-            for (int c = 0; c < col; c++)
-            {
-                board[r, c] = new Button();
-                board[r, c].Tag = new Tuple<int, int, char>(r, c, '\0');
-                board[r, c].Click += ButtonClick;
-            }
     }
 
     public Button GetButton(int r, int c)
@@ -48,24 +40,136 @@ public class ButtonBoard
         return board[r, c];
     }
 
-    private void SetButtonTag(Button current, char player)
+    private Tuple<int, int> GetLocation(Button button)
     {
-        int currentRow = ((Tuple<int, int, char>)current.Tag).Item1;
-        int currentCol = ((Tuple<int, int, char>)current.Tag).Item2;
-        current.Tag = new Tuple<int, int, char>(currentRow, currentCol, player);
+        int row = ((Tuple<int, int, char>)button.Tag).Item1;
+        int col = ((Tuple<int, int, char>)button.Tag).Item2;
+        return new Tuple<int, int>(row, col);
     }
 
     private char GetPlayer(Button button)
     {
         return ((Tuple<int, int, char>)button.Tag).Item3;
     }
+    
+    public ButtonBoard()
+    {
+        board = new Button[row, col];
+        for (int r = 0; r < row; r++)
+        {
+            for (int c = 0; c < col; c++)
+            {
+                board[r, c] = new Button();
+                board[r, c].Tag = new Tuple<int, int, char>(r, c, '\0');
+                board[r, c].Click += ButtonClick;
+            }
+        }
+        CheckWinEvent += CheckHorizontalWin;
+        CheckWinEvent += CheckVerticalWin;
+        CheckWinEvent += CheckDiagonal1Win;
+        CheckWinEvent += CheckDiagonal2Win;
+    }
+
+    private void SetButtonPlayer(Button current, char player)
+    {
+        Tuple<int, int> location = GetLocation(current);
+        current.Tag = new Tuple<int, int, char>(location.Item1, location.Item2, player);
+    }
 
     private bool isWin(Button current)
     {
-        int count = 1;
-        int currentRow = ((Tuple<int, int, char>)current.Tag).Item1;
-        int currentCol = ((Tuple<int, int, char>)current.Tag).Item2;
         char currentPlayer = GetPlayer(current);
+        bool result = false;
+        if (CheckWinEvent is not null)
+        {
+            foreach (CheckWinDelegate checkWinFunc in CheckWinEvent.GetInvocationList())
+            {
+                result = result || checkWinFunc(current, currentPlayer);
+            }
+        }
+        return result;
+    }
+
+
+    private void ButtonClick(object sender, EventArgs e)
+    {
+        Button? button = sender as Button;
+        char player = GetPlayer(button);
+        if (player != '\0') return;
+        if (roundPlayer == true)
+        {
+            button.Text ="X";
+            SetButtonPlayer(button, 'X');
+            roundPlayer = false;
+        }
+        else 
+        {
+            button.Text= "O";
+            SetButtonPlayer(button, 'O');
+            roundPlayer = true;
+        }
+        if (isWin(button))
+        {
+            MessageBox.Show($"Player {GetPlayer(button)} wins the round");
+            RefreshBoard();
+        }
+        else return;
+    }
+    
+    private void RefreshBoard()
+    {
+        for (int r = 0; r < row; r++)
+        {
+            for (int c = 0; c < col; c++)
+            {
+                Button current = GetButton(r, c);
+                SetButtonPlayer(current, '\0');
+                current.Text = "";
+            }
+        }   
+    }
+
+    private bool CheckHorizontalWin(Button button, char currentPlayer)
+    {
+        int count = 1;
+        Tuple<int, int> buttonLocation = GetLocation(button);
+        int currentRow = buttonLocation.Item1;
+        int currentCol = buttonLocation.Item2;
+        while (true)
+        {
+            if (currentCol == 0)
+                break;
+            currentCol--;
+            if (GetPlayer(GetButton(currentRow, currentCol)) == currentPlayer)
+                count++;
+            else 
+                break;
+            if (count == winRule)
+                return true;
+        }
+        currentRow = buttonLocation.Item1;
+        currentCol = buttonLocation.Item2;
+        while (true)
+        {
+            if (currentCol == col - 1)
+                break;
+            currentCol++;
+            if (GetPlayer(GetButton(currentRow, currentCol)) == currentPlayer)
+                count++;
+            else 
+                break;
+            if (count == winRule)
+                return true;
+        }
+        return false;
+    }
+
+    private bool CheckVerticalWin(Button button, char currentPlayer)
+    {
+        int count = 1;
+        Tuple<int, int> buttonLocation = GetLocation(button);
+        int currentRow = buttonLocation.Item1;
+        int currentCol = buttonLocation.Item2;
         while (true)
         {
             if (currentRow == 0)
@@ -78,8 +182,8 @@ public class ButtonBoard
             if (count == winRule)
                 return true;
         }
-        currentRow = ((Tuple<int, int, char>)current.Tag).Item1;
-        currentCol = ((Tuple<int, int, char>)current.Tag).Item2;
+        currentRow = buttonLocation.Item1;
+        currentCol = buttonLocation.Item2;
         while (true)
         {
             if (currentRow == row - 1)
@@ -92,9 +196,15 @@ public class ButtonBoard
             if (count == winRule)
                 return true;
         }
-        count = 1;
-        currentRow = ((Tuple<int, int, char>)current.Tag).Item1;
-        currentCol = ((Tuple<int, int, char>)current.Tag).Item2;
+        return false;
+    }
+
+    private bool CheckDiagonal1Win(Button button, char currentPlayer)
+    {
+        int count = 1;
+        Tuple<int, int> buttonLocation = GetLocation(button);
+        int currentRow = buttonLocation.Item1;
+        int currentCol = buttonLocation.Item2;
         while (true)
         {
             if (currentRow == 0 || currentCol == 0)
@@ -108,8 +218,8 @@ public class ButtonBoard
             if (count == winRule)
                 return true;
         }
-        currentRow = ((Tuple<int, int, char>)current.Tag).Item1;
-        currentCol = ((Tuple<int, int, char>)current.Tag).Item2;
+        currentRow = buttonLocation.Item1;
+        currentCol = buttonLocation.Item2;
         while (true)
         {
             if (currentRow == row - 1 || currentCol == col - 1)
@@ -123,38 +233,15 @@ public class ButtonBoard
             if (count == winRule)
                 return true;
         }
-        count = 1;
-        currentRow = ((Tuple<int, int, char>)current.Tag).Item1;
-        currentCol = ((Tuple<int, int, char>)current.Tag).Item2;
-        while (true)
-        {
-            if (currentCol == 0)
-                break;
-            currentCol--;
-            if (GetPlayer(GetButton(currentRow, currentCol)) == currentPlayer)
-                count++;
-            else 
-                break;
-            if (count == winRule)
-                return true;
-        }
-        currentRow = ((Tuple<int, int, char>)current.Tag).Item1;
-        currentCol = ((Tuple<int, int, char>)current.Tag).Item2;
-        while (true)
-        {
-            if (currentCol == col - 1)
-                break;
-            currentCol++;
-            if (GetPlayer(GetButton(currentRow, currentCol)) == currentPlayer)
-                count++;
-            else 
-                break;
-            if (count == winRule)
-                return true;
-        }
-        count = 1;
-        currentRow = ((Tuple<int, int, char>)current.Tag).Item1;
-        currentCol = ((Tuple<int, int, char>)current.Tag).Item2;
+        return false;
+    }
+
+    private bool CheckDiagonal2Win(Button button, char currentPlayer)
+    {
+        int count = 1;
+        Tuple<int, int> buttonLocation = GetLocation(button);
+        int currentRow = buttonLocation.Item1;
+        int currentCol = buttonLocation.Item2;
         while (true)
         {
             if (currentRow == row - 1 || currentCol == 0)
@@ -168,8 +255,8 @@ public class ButtonBoard
             if (count == winRule)
                 return true;
         }
-        currentRow = ((Tuple<int, int, char>)current.Tag).Item1;
-        currentCol = ((Tuple<int, int, char>)current.Tag).Item2;
+        currentRow = buttonLocation.Item1;
+        currentCol = buttonLocation.Item2;
         while (true)
         {
             if (currentRow ==  0 || currentCol == col - 1)
@@ -184,42 +271,5 @@ public class ButtonBoard
                 return true;
         }
         return false;
-    }
-
-
-    private void ButtonClick(object sender, EventArgs e)
-    {
-        Button? button = sender as Button;
-        char player = GetPlayer(button);
-        if (player != '\0') return;
-        if (roundPlayer == true)
-        {
-            button.Text ="X";
-            SetButtonTag(button, 'X');
-            roundPlayer = false;
-        }
-        else 
-        {
-            button.Text= "O";
-            SetButtonTag(button, 'O');
-            roundPlayer = true;
-        }
-        if (isWin(button))
-        {
-            MessageBox.Show($"Player {GetPlayer(button)} wins the round");
-            RefreshBoard();
-        }
-        else return;
-    }
-    
-    private void RefreshBoard()
-    {
-        for (int r = 0; r < row; r++)
-            for (int c = 0; c < col; c++)
-            {
-                Button current = GetButton(r, c);
-                SetButtonTag(current, '\0');
-                current.Text = "";
-            }
     }
 }
