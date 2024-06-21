@@ -6,7 +6,7 @@ public partial class GameForm : Form
     private int row;
     private int col;
     private int winRule;
-    const int MenuHeight = 30;
+    const int MenuHeight = 40;
     private System.ComponentModel.IContainer components = null;
 
     /// <summary>
