@@ -20,10 +20,14 @@ static class Program
 public class ButtonBoard
 {
     private bool roundPlayer;
-    private int row = 3;
-    private int col = 3;
 
-    private int winRule = 3;
+    private const int DefaultRow = 3;
+    private const int DefaultCol = 3;
+    private const int DefaultWinRule = 3;
+    private int row;
+    private int col;
+
+    private int winRule;
 
     private Button[, ] board;
 
@@ -54,6 +58,9 @@ public class ButtonBoard
     
     public ButtonBoard()
     {
+        row = DefaultRow;
+        col = DefaultCol;
+        winRule = DefaultWinRule;
         board = new Button[row, col];
         for (int r = 0; r < row; r++)
         {
@@ -131,7 +138,12 @@ public class ButtonBoard
         }
         if (isWin(button))
         {
-            MessageBox.Show($"Player {GetPlayer(button)} wins the round");
+            MessageBox.Show($"Player {GetPlayer(button)} wins the round!");
+            RefreshBoard();
+        }
+        else if (isDraw())
+        {
+            MessageBox.Show("It's a draw!");
             RefreshBoard();
         }
         else return;
@@ -292,5 +304,18 @@ public class ButtonBoard
                 return true;
         }
         return false;
+    }
+
+    private bool isDraw()
+    {
+        int occupied = 0;
+        foreach (Button button in board)
+        {
+            if (GetPlayer(button) != '\0')
+            {
+                occupied++;
+            }
+        }
+        return occupied == row * col ? true : false;
     }
 }
