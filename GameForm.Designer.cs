@@ -72,6 +72,8 @@ partial class GameForm
 
     private void ChangeSizeItemClick(object sender, EventArgs e)
     {
+        ResizeForm dialog = new ResizeForm(this);
+        dialog.ShowDialog(this);
     }
 
     private void RestartItemClick(object sender, EventArgs e)
@@ -84,5 +86,22 @@ partial class GameForm
         this.Close();
     }
 
+    public void RecreateBoard(string row, string col, string winRule)
+    {
+        for (int i = this.Controls.Count - 1; i >= 0; i--)
+        {
+            Control control = this.Controls[i];
+            this.Controls.RemoveAt(i);
+            control.Dispose();
+        }
+        int.TryParse(row, out this.row);
+        int.TryParse(col, out this.col);
+        int.TryParse(winRule, out this.winRule);
+        board = new ButtonBoard(this.row, this.col, this.winRule);
+        InitializeComponent();
+        CreateGridButtons();
+        InitializeMenu();
+    }
+    
     #endregion
 }

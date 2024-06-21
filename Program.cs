@@ -30,9 +30,9 @@ public class ButtonBoard
     public delegate bool CheckWinDelegate(Button button, char currentPlayer);
     public event CheckWinDelegate CheckWinEvent;
 
-    public Tuple<int, int> GetSize()
+    public Tuple<int, int, int> GetBoardInfo()
     {
-        return new Tuple<int, int>(row, col);
+        return new Tuple<int, int, int>(row, col, winRule);
     }
 
     public Button GetButton(int r, int c)
@@ -70,6 +70,27 @@ public class ButtonBoard
         CheckWinEvent += CheckDiagonal2Win;
     }
 
+    public ButtonBoard(int row, int col, int winRule)
+    {
+        this.row = row;
+        this.col = col;
+        this.winRule = winRule;
+        board = new Button[row, col];
+        for (int r = 0; r < row; r++)
+        {
+            for (int c = 0; c < col; c++)
+            {
+                board[r, c] = new Button();
+                board[r, c].Tag = new Tuple<int, int, char>(r, c, '\0');
+                board[r, c].Click += ButtonClick;
+            }
+        }
+        CheckWinEvent += CheckHorizontalWin;
+        CheckWinEvent += CheckVerticalWin;
+        CheckWinEvent += CheckDiagonal1Win;
+        CheckWinEvent += CheckDiagonal2Win;
+    }
+    
     private void SetButtonPlayer(Button current, char player)
     {
         Tuple<int, int> location = GetLocation(current);
