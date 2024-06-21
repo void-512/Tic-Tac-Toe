@@ -14,11 +14,15 @@ public class ResizeForm : Form
     String rowResult;
     String colResult;
     String winRuleResult;
+
+    // ResizeForm(gForm): Instantiates the resize dialog with GameForm
     public ResizeForm(GameForm gForm)
     {
         this.gForm = gForm;
         InitializeComponent();
     }
+
+    // InitializeComponent(): Initializes the dialog form
     private void InitializeComponent()
     {
         this.rowLabel = new Label();
@@ -110,6 +114,7 @@ public class ResizeForm : Form
         this.PerformLayout();
     }
 
+    // buttonOKClick(sender, e): Actions when OK button is clicked
     private void buttonOKClick(object sender, EventArgs e)
     {
         rowResult = rowInput.Text;
@@ -120,6 +125,7 @@ public class ResizeForm : Form
         this.Close();
     }
 
+    // buttonCancelClick(sender, e): Actions when Cancel button is clicked
     private void buttonCancelClick(object sender, EventArgs e)
     {
         this.DialogResult = DialogResult.Cancel;

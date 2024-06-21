@@ -8,6 +8,7 @@ partial class GameForm
     ///  Clean up any resources being used.
     /// </summary>
     /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+    // Dispose(disposing): System Generated Function
     protected override void Dispose(bool disposing)
     {
         if (disposing && (components != null))
@@ -17,8 +18,7 @@ partial class GameForm
         base.Dispose(disposing);
     }
 
-    #region Windows Form Designer generated code
-
+    // InitializeComponent(): Set basic features of the form
     private void InitializeComponent()
     {
         this.components = new System.ComponentModel.Container();
@@ -29,6 +29,7 @@ partial class GameForm
         this.MaximizeBox = false;
     }
 
+    // CreateGridButtons(): Initialize the board with buttons
     private void CreateGridButtons()
     {
         int buttonWidth = this.Size.Width / col - 10;
@@ -46,12 +47,13 @@ partial class GameForm
         }
     }
 
+    // InitializeMenu(): Initialize the menu bar at top of form
     private void InitializeMenu()
     {
         // Create a MenuStrip
         MenuStrip menuStrip = new MenuStrip();
 
-        // Create top-level menu items
+        // Create menu items
         ToolStripMenuItem changeSizeItem = new ToolStripMenuItem("Change Size");
         ToolStripMenuItem restartItem = new ToolStripMenuItem("Restart");
         ToolStripMenuItem exitItem = new ToolStripMenuItem("Exit");
@@ -60,7 +62,7 @@ partial class GameForm
         exitItem.Click += ExitItemClick;
         restartItem.Click += RestartItemClick;
 
-        // Add top-level menus to the MenuStrip
+        // Add menus to the MenuStrip
         menuStrip.Items.Add(changeSizeItem);
         menuStrip.Items.Add(restartItem);
         menuStrip.Items.Add(exitItem);
@@ -70,22 +72,26 @@ partial class GameForm
         this.Controls.Add(menuStrip);
     }
 
+    // ChangeSizeItemClick(sender, e): Actions when Change Size button is clicked
     private void ChangeSizeItemClick(object sender, EventArgs e)
     {
         ResizeForm dialog = new ResizeForm(this);
         dialog.ShowDialog(this);
     }
 
+    // RestartItemClick(sender, e): Actions when Restart button is clicked
     private void RestartItemClick(object sender, EventArgs e)
     {
         board.RefreshBoard();
     }
 
+    // ExitItemClick(sender, e): Actions when Exit button is clicked
     private void ExitItemClick(object sender, EventArgs e)
     {
         this.Close();
     }
 
+    // RecreateBoard(row, col, winRule): Regenerate the board with row, col, winRule (if they are integers)
     public void RecreateBoard(string row, string col, string winRule)
     {
         for (int i = this.Controls.Count - 1; i >= 0; i--)
@@ -102,6 +108,4 @@ partial class GameForm
         CreateGridButtons();
         InitializeMenu();
     }
-    
-    #endregion
 }

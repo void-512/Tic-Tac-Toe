@@ -6,7 +6,6 @@ public partial class GameForm : Form
     private int row;
     private int col;
     private int winRule;
-
     const int MenuHeight = 30;
 
     public GameForm()
