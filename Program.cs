@@ -116,7 +116,7 @@ public class ButtonBoard
         else return;
     }
     
-    private void RefreshBoard()
+    public void RefreshBoard()
     {
         for (int r = 0; r < row; r++)
         {
