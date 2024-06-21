@@ -309,6 +309,6 @@ public class ButtonBoard
                 occupied++;
             }
         }
-        return occupied == row * col ? true : false;
+        return occupied == row * col;
     }
 }
